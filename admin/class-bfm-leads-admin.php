@@ -455,7 +455,7 @@ class Bfm_Leads_Admin {
 
 		$lead->property_status   = ($lead->property_status) ? $property_status[ $lead->property_status ] : 'NA';
 
-		$lead->property_manager  = ( $lead->property_manager ) ? $property_manager[ $lead->property_manager ] : 'NA';
+		$lead->property_manager  = ( $lead->property_manager ) ? $property_manager[ $lead->property_manager ] : 'No';
 
 		$lead->rent_price        = ($lead->rent_price) ? $lead->rent_price : '0.00';
 
