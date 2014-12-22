@@ -613,12 +613,11 @@ class Bfm_Leads_Admin {
 					'options' => $this->parse_get_response_campaigns($campaigns)
 				);
 
+				array_push( $fields['bfm_get_response'], $campaigns_list);
+
 			}
 
 		}
-
-		array_push( $fields['bfm_get_response'], $campaigns_list);
-
 
 
         $this->settings_api->set_sections( $sections );
