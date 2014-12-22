@@ -16,7 +16,7 @@
  * Plugin Name:       Bellflower Lead Generator
  * Plugin URI:        http://www.bellflowermedia.com/
  * Description:       Lead Generator for Real Estate Sites, Allows to add Steps forms to collect leads with full analytics, leads listing and Get Response integration to collect email address as well.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Enrique Chavez
  * Author URI:        http://enriquechavez.co
  * License:           GPL-2.0+
