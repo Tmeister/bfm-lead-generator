@@ -15,8 +15,8 @@
  * @wordpress-plugin
  * Plugin Name:       Bellflower Lead Generator
  * Plugin URI:        http://www.bellflowermedia.com/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress dashboard.
- * Version:           1.0.1
+ * Description:       Lead Generator for Real Estate Sites, Allows to add Steps forms to collect leads with full analytics, leads listing and Get Response integration to collect email address as well.
+ * Version:           1.0.2
  * Author:            Enrique Chavez
  * Author URI:        http://enriquechavez.co
  * License:           GPL-2.0+
