@@ -194,18 +194,25 @@ class Bfm_Leads {
 
 		$this->loader->add_action( 'wp_ajax_add_email', $plugin_public, 'add_email' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_email', $plugin_public, 'add_email' );
+
 		$this->loader->add_action( 'wp_ajax_add_name_phone_best', $plugin_public, 'add_name_phone_best');
 		$this->loader->add_action( 'wp_ajax_nopriv_add_name_phone_best', $plugin_public, 'add_name_phone_best');
+
 		$this->loader->add_action( 'wp_ajax_add_status_rent_manager', $plugin_public, 'add_status_rent_manager');
-		$this->loader->add_action( 'wp_ajax_no_priv_add_status_rent_manager', $plugin_public, 'add_status_rent_manager');
+		$this->loader->add_action( 'wp_ajax_nopriv_add_status_rent_manager', $plugin_public, 'add_status_rent_manager');
+
 		$this->loader->add_action( 'wp_ajax_add_comments', $plugin_public, 'add_comments');
-		$this->loader->add_action( 'wp_ajax_no_priv_add_comments', $plugin_public, 'add_comments');
+		$this->loader->add_action( 'wp_ajax_nopriv_add_comments', $plugin_public, 'add_comments');
+
 		$this->loader->add_action( 'wp_ajax_add_email_and_name', $plugin_public, 'add_email_and_name' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_email_and_name', $plugin_public, 'add_email_and_name' );
+
 		$this->loader->add_action( 'wp_ajax_add_phone_best', $plugin_public, 'add_phone_best' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_phone_best', $plugin_public, 'add_phone_best' );
+
 		$this->loader->add_action( 'wp_ajax_add_aditional_fields', $plugin_public, 'add_aditional_fields' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_aditional_fields', $plugin_public, 'add_aditional_fields' );
+
 		$this->loader->add_action( 'wp_ajax_add_form_hit', $plugin_public, 'add_form_hit' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_form_hit', $plugin_public, 'add_form_hit' );
 
