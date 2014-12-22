@@ -3,7 +3,7 @@
 /**
  * The public-facing functionality of the plugin.
  *
- * @link       http://example.com
+ * @link       http://www.bellflowermedia.com/
  * @since      1.0.0
  *
  * @package    Bfm_Leads
@@ -41,6 +41,12 @@ class Bfm_Leads_Public {
 	private $version;
 
 	/**
+	 * Database Class
+	 *
+	 */
+	private $db;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
@@ -50,9 +56,24 @@ class Bfm_Leads_Public {
 	public function __construct( $bfm_leads, $version ) {
 
 		$this->bfm_leads = $bfm_leads;
-		$this->version = $version;
+
+		$this->version   = $version;
+
+		$this->db        = new Bfm_Leads_Db();
 
 	}
+
+	/**
+	 * Init Setup
+	 *
+	 * @since    1.0.0
+	 */
+	public function init(){
+
+		add_shortcode('bfm-form', array( $this, 'parse_shortcode' ) );
+
+	}
+
 
 	/**
 	 * Register the stylesheets for the public-facing side of the site.
@@ -61,17 +82,7 @@ class Bfm_Leads_Public {
 	 */
 	public function enqueue_styles() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Bfm_Leads_Public_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Bfm_Leads_Public_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		wp_enqueue_style( 'select2', plugin_dir_url( __FILE__ ) . 'css/select2.css', array(), '3.5.2', 'all' );
 
 		wp_enqueue_style( $this->bfm_leads, plugin_dir_url( __FILE__ ) . 'css/bfm-leads-public.css', array(), $this->version, 'all' );
 
@@ -84,19 +95,474 @@ class Bfm_Leads_Public {
 	 */
 	public function enqueue_scripts() {
 
+		wp_enqueue_script( 'maskinput', plugin_dir_url( __FILE__ ) . 'js/jquery.maskedinput.min.js', array( 'jquery' ), '1.3.1', false );
+
+		wp_enqueue_script( 'parsley', plugin_dir_url( __FILE__ ) . 'js/parsley.min.js', array( 'jquery' ), '2.0.6', false );
+
+		wp_enqueue_script( 'select2', plugin_dir_url( __FILE__ ) . 'js/select2.js', array( 'jquery' ), '3.5.2', false );
+
+		wp_enqueue_script( $this->bfm_leads, plugin_dir_url( __FILE__ ) . 'js/min/bfm-leads-public-min.js', array( 'jquery' ), $this->version, false );
+
+		$data = array(
+
+			'ajax_url' => admin_url('admin-ajax.php'),
+
+			'nonce' => wp_create_nonce( "bfmleads" )
+
+		);
+
+		wp_localize_script( $this->bfm_leads, 'bfm', $data );
+
+	}
+
+	public function parse_shortcode($atts){
+
+		$defaults = array(
+
+			'layout' => 'horizontal',
+
+			'steps' => '3'
+
+		);
+
+		$atts = shortcode_atts( $defaults, $atts );
+
+		$layout = $atts['layout'];
+
+		$steps = $atts['steps'];
+
+		ob_start();
+
+		if( '3' == $steps ){
+
+			include plugin_dir_path( __FILE__ ) . 'partials/bfm-3-steps-form.php';
+
+		} else if( '4' == $steps ){
+
+			include plugin_dir_path( __FILE__ ) . 'partials/bfm-4-steps-form.php';
+
+		}
+
+		return ob_get_clean();
+
+	}
+
+
+	public function add_email(){
+
+		global $wpdb;
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$email = sanitize_email( $_POST['email'] );
+
+		$leads_table = $this->db->get_table_prefix() . 'leads';
+
 		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Bfm_Leads_Public_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Bfm_Leads_Public_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
+		 * Check if already exist in the DB
 		 */
 
-		wp_enqueue_script( $this->bfm_leads, plugin_dir_url( __FILE__ ) . 'js/bfm-leads-public.js', array( 'jquery' ), $this->version, false );
+		$row = $wpdb->get_row( $wpdb->prepare(
+
+			'SELECT id FROM ' . $leads_table . ' WHERE email = %s',
+
+			$email
+
+		) );
+
+		/*if( $row ){
+
+			echo json_encode(array(
+
+				'status' => 'fail',
+
+				'message' => 'Email already exist in our records.'
+
+			));
+
+			die();
+		}*/
+
+		/**
+		 * OK, Insert the Email.
+		 */
+
+		$insert = $wpdb->insert( $leads_table, array( 'email' => $email, 'form_id' => 1, 'input_time' => date("Y-m-d H:i:s") ) );
+
+		if( $insert ){
+
+			$out = array(
+
+				'status' => 'success',
+
+				'user_id' => $wpdb->insert_id
+
+			);
+
+			$this->add_form_conversion( 1 );
+
+		} else {
+
+			$out = array(
+
+				'status' => 'fail',
+
+				'message' => 'Error inserting email'
+
+			);
+
+		}
+
+		echo json_encode( $out );
+
+		die();
+
+	}
+
+	public function add_name_phone_best(){
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$name = sanitize_text_field( $_POST['name'] );
+
+		$phone = sanitize_text_field( $_POST['phone'] );
+
+		$best_time = intval( $_POST['best_time'] );
+
+		$user_id = intval( $_POST['user_id'] );
+
+		$names = explode(' ', $name);
+
+		$firstname = ( isset( $names[0] ) ) ? $names[0] : '';
+
+		$lastname = ( isset( $names[1] ) ) ? $names[1] : '';
+
+		$data = array(
+
+			'first_name' => $firstname,
+
+			'last_name' => $lastname,
+
+			'best_time_to_call' => $best_time,
+
+			'phone' => $phone
+
+		);
+
+		$where = array( 'id' => $user_id );
+
+		$this->db->update_ajax_data( 'leads', $data, $where );
+
+	}
+
+	public function add_status_rent_manager(){
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$status = intval( $_POST['status'] );
+
+		$rent = floatval( $_POST['rent'] );
+
+		$user_id = intval( $_POST['user_id'] );
+
+		$manager = sanitize_text_field( $_POST['manager'] );
+
+		$manager = ( $manager === 'yes' ) ? 1 : 0;
+
+		$data = array(
+
+			'property_status' => $status,
+
+			'rent_price' => $rent,
+
+			'property_manager' => $manager
+
+		);
+
+		$where =array( 'id' => $user_id );
+
+		$this->db->update_ajax_data( 'leads', $data, $where );
+
+	}
+
+	public function add_comments(){
+
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$user_id = intval( $_POST['user_id'] );
+
+		$comments = esc_textarea( $_POST['comments'] );
+
+		$data = array(
+
+			'comments' => $comments,
+
+			'complete' => 1
+
+		);
+
+		$where = array( 'id' => $user_id );
+
+		$this->db->update_ajax_data( 'leads', $data, $where );
+
+	}
+
+	public function add_email_and_name(){
+
+		global $wpdb;
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$email = sanitize_email( $_POST['email'] );
+
+		$name = sanitize_text_field( $_POST['name'] );
+
+		$names = explode(' ', $name);
+
+		$firstname = ( isset( $names[0] ) ) ? $names[0] : '';
+
+		$lastname = ( isset( $names[1] ) ) ? $names[1] : '';
+
+		$leads_table = $this->db->get_table_prefix() . 'leads';
+
+		/**
+		 * Check if already exist in the DB
+		 */
+
+		$row = $wpdb->get_row( $wpdb->prepare(
+
+			'SELECT id FROM ' . $leads_table . ' WHERE email = %s',
+
+			$email
+
+		) );
+
+		/*if( $row ){
+
+			echo json_encode(array(
+
+				'status' => 'fail',
+
+				'message' => 'Email already exist in our records.'
+
+			));
+
+			die();
+		}*/
+
+		$insert = $wpdb->insert(
+
+			$leads_table,
+
+			array(
+
+				'email' => $email,
+
+				'first_name' => $firstname,
+
+				'last_name' => $lastname,
+
+				'form_id' => 2,
+
+				'input_time' => date("Y-m-d H:i:s"),
+			)
+		);
+
+		if( $insert ){
+
+			$out = array(
+
+				'status' => 'success',
+
+				'user_id' => $wpdb->insert_id
+
+			);
+
+			$this->add_form_conversion( 2 );
+
+		} else {
+
+			$out = array(
+
+				'status' => 'fail',
+
+				'message' => 'Error inserting email'
+
+			);
+
+		}
+
+		echo json_encode( $out );
+
+		die();
+
+	}
+
+	public function add_phone_best(){
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$user_id = intval( $_POST['user_id'] );
+
+		$phone = sanitize_text_field( $_POST['phone'] );
+
+		$best_time = intval( $_POST['best_time'] );
+
+		$data = array(
+
+			'phone' => $phone,
+
+			'best_time_to_call' => $best_time
+
+		);
+
+		$where = array( 'id' => $user_id );
+
+		$this->db->update_ajax_data( 'leads', $data, $where );
+
+	}
+
+	public function add_aditional_fields(){
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$user_id = intval( $_POST['user_id'] );
+
+		$status = intval( $_POST['status'] );
+
+		$rent = floatval( $_POST['rent'] );
+
+		$user_id = intval( $_POST['user_id'] );
+
+		$manager = sanitize_text_field( $_POST['manager'] );
+
+		$manager = ( $manager === 'yes' ) ? 1 : 0;
+
+		$comments = esc_textarea( $_POST['comments'] );
+
+		$data = array(
+
+			'property_status' => $status,
+
+			'rent_price' => $rent,
+
+			'property_manager' => $manager,
+
+			'comments' => $comments,
+
+			'complete' => 1,
+
+		);
+
+		$where = array( 'id' => $user_id );
+
+		$this->db->update_ajax_data( 'leads', $data, $where );
+
+	}
+
+	public function add_form_hit(){
+
+		global $wpdb;
+
+		check_ajax_referer('bfmleads', 'nonce');
+
+		$logs_table = $this->db->get_table_prefix() . 'logs';
+
+		$form_id = intval( $_POST['form_id'] );
+
+		$data = array(
+
+			'time' => date("Y-m-d H:i:s"),
+
+			'data_type' => 'impression',
+
+			'form_id' => $form_id,
+
+			'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+
+			'referer' => esc_url( $_SERVER['HTTP_REFERER'] ),
+
+			'ip_address' => $this->get_ip_address()
+		);
+
+		$insert = $wpdb->insert( $logs_table, $data );
+
+		if( $insert ){
+
+			$out = array( 'status' => 'success');
+
+		} else {
+
+			$out = array( 'status' => 'fail', 'message' => 'Error inserting impression' );
+
+		}
+
+		echo json_encode( $out );
+
+		die();
+
+	}
+
+	public function add_form_conversion($form_id){
+
+		global $wpdb;
+
+		$logs_table = $this->db->get_table_prefix() . 'logs';
+
+		$data = array(
+
+			'time' => date("Y-m-d H:i:s"),
+
+			'data_type' => 'conversion',
+
+			'form_id' => $form_id,
+
+			'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+
+			'referer' => esc_url( $_SERVER['HTTP_REFERER'] ),
+
+			'ip_address' => $this->get_ip_address()
+		);
+
+		$insert = $wpdb->insert( $logs_table, $data );
+
+	}
+
+	/**
+	 * Get visitor IP address.
+	 *
+	 * @since  1.0.0
+	 * @return string IP address
+	 * @see    http://stackoverflow.com/a/15699314
+	 */
+	public static function get_ip_address() {
+
+		$env = array(
+			'HTTP_CLIENT_IP',
+			'HTTP_X_FORWARDED_FOR',
+			'HTTP_X_FORWARDED',
+			'HTTP_X_CLUSTER_CLIENT_IP',
+			'HTTP_FORWARDED_FOR',
+			'HTTP_FORWARDED',
+			'REMOTE_ADDR'
+		);
+
+		foreach( $env as $key ) {
+
+			if( array_key_exists( $key, $_SERVER ) === true ) {
+
+				foreach( explode( ',', $_SERVER[$key] ) as $ipaddress ) {
+
+                	$ipaddress = trim( $ipaddress ); // Just to be safe
+
+					if( filter_var( $ipaddress, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) !== false )
+						return $ipaddress;
+				}
+			}
+		}
+
+		return 'unknown';
 
 	}
 

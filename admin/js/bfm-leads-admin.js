@@ -1,32 +1,70 @@
-(function( $ ) {
+/*global jQuery:false */
+/*global ajaxurl:true */
+var DEBUG = false;
+jQuery(document).ready(function($) {
+
 	'use strict';
 
-	/**
-	 * All of the code for your Dashboard-specific JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note that this assume you're going to use jQuery, so it prepares
-	 * the $ function reference to be used within the scope of this
-	 * function.
-	 *
-	 * From here, you're able to define handlers for when the DOM is
-	 * ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * Or when the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and so on.
-	 *
-	 * Remember that ideally, we should not attach any more than a single DOM-ready or window-load handler
-	 * for any particular page. Though other scripts in WordPress core, other plugins, and other themes may
-	 * be doing this, we should try to minimize doing that in our own work.
-	 */
+	if( $('.bfm-analytics').length ){
 
-})( jQuery );
+		var bfmTable = $('#bfm-stats-general'),
+			plotarea = $('#bfm-stats-graph');
+
+
+		$('.bfm-stats-controls').on('change', 'select', function (event) {
+			event.preventDefault();
+			var form = $(this).parents('form');
+			form.submit();
+		});
+
+		var data = {
+			'action': 'bfm_get_graph_data',
+			'bfm_analytics_form': bfmTable.data('form'),
+			'bfm_analytics_time': bfmTable.data('timeframe'),
+			'bfm_analytics_period': bfmTable.data('period')
+		};
+		$.post(ajaxurl, data, function (response) {
+
+			if (DEBUG) {
+				console.log(response);
+			}
+
+			var json = $.parseJSON(response);
+
+			// Graph Options
+			var graphOptions = {
+				series: {
+					lines: {
+						show: true
+					},
+					points: {
+						show: true
+					}
+				},
+				grid: {
+					color: '#ccc',
+					borderWidth: 1,
+					borderColor: '#666',
+					hoverable: true
+				},
+				xaxis: {
+					mode: 'time',
+					minTickSize: json.scale.minTickSize,
+					timeFormat: json.scale.timeformat,
+					min: json.min,
+					max: json.max
+				},
+				tooltip: true,
+				tooltipOpts: {
+					content: "%s: %y"
+				}
+			};
+
+			// Draw graph
+			$.plot(plotarea, [json.impressionsData, json.conversionsData], graphOptions);
+			plotarea.removeClass('wpbo-loading');
+
+		});
+	}
+
+});

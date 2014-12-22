@@ -1,4 +1,14 @@
-/**
- * All of the CSS for your dashboard-specific functionality should be
- * included in this file.
- */
+.bfm-custom table thead {
+  border-bottom: 1px solid #e1e1e1;
+}
+.bfm-custom table th,
+.bfm-custom table td {
+  text-align: center;
+}
+.bfm-stats-controls,
+.bfm-postbox {
+  padding: 20px;
+}
+.bfm-postbox .row p {
+  padding: 0 20px;
+}

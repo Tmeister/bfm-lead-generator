@@ -8,7 +8,7 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://example.com
+ * @link              http://www.bellflowermedia.com/
  * @since             1.0.0
  * @package           Bfm_Leads
  *
@@ -29,6 +29,13 @@
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
+
+define('BMF_LEADS_DB_VERSION', '1.0.11');
+
+/**
+ * The class responsible for Update the Plugin via GitHub
+ */
+require_once plugin_dir_path( __FILE__ )  . 'includes/vendors/BFIGitHubPluginUploader.php';
 
 /**
  * The code that runs during plugin activation.
@@ -67,6 +74,10 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-bfm-leads.php';
  * @since    1.0.0
  */
 function run_bfm_leads() {
+
+	if ( is_admin() ) {
+	    new BFIGitHubPluginUpdater( __FILE__, 'Tmeister', "bfm-lead-generator", "8ff73cf06dc92df1648c537bdf86b1cd00486b75" );
+	}
 
 	$plugin = new Bfm_Leads();
 	$plugin->run();

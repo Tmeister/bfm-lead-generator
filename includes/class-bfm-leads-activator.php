@@ -31,6 +31,9 @@ class Bfm_Leads_Activator {
 	 */
 	public static function activate() {
 
+		$db = new Bfm_Leads_Db();
+		$db->run_db_installer();
+
 	}
 
 }

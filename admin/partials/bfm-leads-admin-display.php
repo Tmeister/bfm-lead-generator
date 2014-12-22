@@ -1,16 +1,24 @@
 <?php
 
-/**
- * Provide a dashboard view for the plugin
- *
- * This file is used to markup the public-facing aspects of the plugin.
- *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Bfm_Leads
- * @subpackage Bfm_Leads/admin/partials
- */
+	//Create an instance of our package class...
+    $leads = new Bfm_Leads_Table();
+    //Fetch, prepare, sort, and filter our data...
+    $leads->prepare_items();
+
 ?>
 
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
+<div class="wrap">
+
+    <div id="icon-users" class="icon32"><br/></div>
+
+    <h2>Leads</h2>
+
+    <form id="movies-filter" method="get">
+
+        <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+
+        <?php $leads->display() ?>
+
+    </form>
+
+</div>
