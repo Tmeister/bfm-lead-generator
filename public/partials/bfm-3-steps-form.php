@@ -12,15 +12,21 @@
 	});
 </script>
 
+<style>
+	#<?php echo $id ?> label{
+		color: <?php echo $labels_color ?>;
+	}
+</style>
+
 <div class="step-optin-form <?php echo $layout ?>" id="<?php echo $id ?>">
 
 	<div class="error">
 		Please make sure that you have filled in the fields correctly!
 	</div>
 
-	<div class="bfm-holder">
+	<div class="bfm-holder" style="border-color: <?php echo $border_color ?>";>
 		<form>
-			<div class="bfm-left-inner">
+			<div class="bfm-left-inner" style="background-color: <?php echo $left_inner ?>">
 				<div class="bfm-left-inner-holder">
 					<div class="mask">
 						<fieldset class="screen current">
@@ -92,28 +98,17 @@
 									<label for="bfm-comments">Additional comments/questions?</label>
 									<textarea id="bfm-comments"></textarea>
 								</div>
-
-							</div>
-
-						</fieldset>
-
-						<fieldset class="screen">
-							<div class="centered">
-								<div class="bfm-field">
-									<h3 style="text-align: center;">Thank You.</h3>
-								</div>
 							</div>
 						</fieldset>
-
 					</div>
 				</div>
 			</div>
-			<div class="bfm-right-inner">
+			<div class="bfm-right-inner" style="background-color: <?php echo $right_inner ?>">
 				<div class="bfm-right-inner-holder">
 					<div class="bfm-right-inner-cell">
 						<div class="loading"></div>
 						<div>
-							<input type="button" name="next" class="next action-button" value="Next" id="next-button"/>
+							<input type="button" name="next" class="next action-button" value="Next" id="next-button" style="background-color:<?php echo $button_bg ?>; color: <?php echo $button_color ?>;" />
 						</div>
 					</div>
 				</div>

@@ -297,7 +297,7 @@ class Bfm_Leads_Db{
 		return $this->prefix;
 	}
 
-	public function update_ajax_data( $table, $data, $where ){
+	public function update_ajax_data( $table, $data, $where, $thanks_url = false ){
 
 		global $wpdb;
 
@@ -319,11 +319,17 @@ class Bfm_Leads_Db{
 
 		}
 
-		echo json_encode(array(
+		if( $thanks_url ){
 
-			'status' => 'success'
+			$out = array( 'status' => 'success', 'thanks_url' => $thanks_url );
 
-		));
+		}else{
+
+			$out = array( 'status' => 'success' );
+
+		}
+
+		echo json_encode( $out );
 
 		die();
 

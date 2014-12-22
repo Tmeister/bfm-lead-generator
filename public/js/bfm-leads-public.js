@@ -336,7 +336,13 @@
 
 						$next.hide();
 
-						gotonextfs();
+						if( data.thanks_url ){
+
+							window.location.href = data.thanks_url;
+
+						}
+
+						//gotonextfs();
 
 					}
 
@@ -512,7 +518,13 @@
 
 						$next.hide();
 
-						gotonextfs();
+						if( data.thanks_url ){
+
+							window.location.href = data.thanks_url;
+
+						}
+
+						//gotonextfs();
 
 					}
 

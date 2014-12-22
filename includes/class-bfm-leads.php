@@ -102,6 +102,16 @@ class Bfm_Leads {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/db/class-bfm-leads-db.php';
 
 		/**
+		 * The class responsible for Settings
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/vendors/class.settings-api.php';
+
+		/**
+		 * The class responsible for Get Response API
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/vendors/getresponse/class-get-response.php';
+
+		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
@@ -160,6 +170,7 @@ class Bfm_Leads {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'update_db_check');
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'create_settings');
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menus' );
 		$this->loader->add_action( 'wp_ajax_bfm_get_graph_data', $plugin_admin, 'get_graph_data' );
 
@@ -179,6 +190,8 @@ class Bfm_Leads {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_public, 'init' );
+
+
 		$this->loader->add_action( 'wp_ajax_add_email', $plugin_public, 'add_email' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_email', $plugin_public, 'add_email' );
 		$this->loader->add_action( 'wp_ajax_add_name_phone_best', $plugin_public, 'add_name_phone_best');
@@ -195,6 +208,8 @@ class Bfm_Leads {
 		$this->loader->add_action( 'wp_ajax_nopriv_add_aditional_fields', $plugin_public, 'add_aditional_fields' );
 		$this->loader->add_action( 'wp_ajax_add_form_hit', $plugin_public, 'add_form_hit' );
 		$this->loader->add_action( 'wp_ajax_nopriv_add_form_hit', $plugin_public, 'add_form_hit' );
+
+		$this->loader->add_filter( 'the_content', $plugin_public, 'add_form_to_posts' );
 
 
 	}

@@ -133,8 +133,6 @@ class Bfm_Leads_Table extends WP_List_Table {
         	$limit
         );
 
-        var_dump($sql);
-
         $data = $wpdb->get_results( $sql, ARRAY_A );
 
         //TOTAL

@@ -72,6 +72,8 @@ class Bfm_Leads_Public {
 
 		add_shortcode('bfm-form', array( $this, 'parse_shortcode' ) );
 
+		add_filter('widget_text', 'do_shortcode');
+
 	}
 
 
@@ -131,6 +133,18 @@ class Bfm_Leads_Public {
 
 		$steps = $atts['steps'];
 
+		$border_color = $this->get_setting('bfm_form_colors', 'bfm_f_border_color');
+
+		$left_inner = $this->get_setting('bfm_form_colors', 'bfm_f_left_inner_bg');
+
+		$right_inner = $this->get_setting('bfm_form_colors', 'bfm_f_right_inner_bg');
+
+		$button_bg = $this->get_setting('bfm_form_colors', 'bfm_f_button_bg');
+
+		$button_color = $this->get_setting('bfm_form_colors', 'bfm_f_button_color');
+
+		$labels_color = $this->get_setting('bfm_form_colors', 'bfm_f_labels_color');
+
 		ob_start();
 
 		if( '3' == $steps ){
@@ -170,7 +184,7 @@ class Bfm_Leads_Public {
 
 		) );
 
-		/*if( $row ){
+		if( $row ){
 
 			echo json_encode(array(
 
@@ -181,7 +195,7 @@ class Bfm_Leads_Public {
 			));
 
 			die();
-		}*/
+		}
 
 		/**
 		 * OK, Insert the Email.
@@ -190,6 +204,8 @@ class Bfm_Leads_Public {
 		$insert = $wpdb->insert( $leads_table, array( 'email' => $email, 'form_id' => 1, 'input_time' => date("Y-m-d H:i:s") ) );
 
 		if( $insert ){
+
+			$this->send_data_to_mailing_provider( array('email' => $email) );
 
 			$out = array(
 
@@ -304,7 +320,10 @@ class Bfm_Leads_Public {
 
 		$where = array( 'id' => $user_id );
 
-		$this->db->update_ajax_data( 'leads', $data, $where );
+		$thanks_url = $this->get_setting('bfm_global_settings', 'bfm_thankyou_page');
+
+		$this->db->update_ajax_data( 'leads', $data, $where, $thanks_url );
+
 
 	}
 
@@ -338,7 +357,7 @@ class Bfm_Leads_Public {
 
 		) );
 
-		/*if( $row ){
+		if( $row ){
 
 			echo json_encode(array(
 
@@ -349,7 +368,7 @@ class Bfm_Leads_Public {
 			));
 
 			die();
-		}*/
+		}
 
 		$insert = $wpdb->insert(
 
@@ -370,6 +389,8 @@ class Bfm_Leads_Public {
 		);
 
 		if( $insert ){
+
+			$this->send_data_to_mailing_provider( array('email' => $email, 'name' => $name) );
 
 			$out = array(
 
@@ -457,7 +478,9 @@ class Bfm_Leads_Public {
 
 		$where = array( 'id' => $user_id );
 
-		$this->db->update_ajax_data( 'leads', $data, $where );
+		$thanks_url = $this->get_setting('bfm_global_settings', 'bfm_thankyou_page');
+
+		$this->db->update_ajax_data( 'leads', $data, $where, $thanks_url );
 
 	}
 
@@ -529,6 +552,29 @@ class Bfm_Leads_Public {
 
 	}
 
+	public function add_form_to_posts($content){
+
+		global $post;
+
+		$show_form = $this->get_setting('bfm_global_settings', 'bfm_footer_posts');
+
+		if( 'post' == $post->post_type && is_single() && $show_form == 'on'){
+
+			$steps = $this->get_setting('bfm_global_settings', 'bfm_footer_form');
+
+			$steps = ( $steps == '1' ) ? '4' : '3';
+
+			$layout = $this->get_setting('bfm_global_settings', 'bfm_footer_form_layout');
+
+			$shortcode = sprintf( '[bfm-form layout="%s" steps="%s"]', $layout, $steps );
+
+			$content .=  '<hr>' . do_shortcode( $shortcode );
+
+		}
+
+		return $content;
+	}
+
 	/**
 	 * Get visitor IP address.
 	 *
@@ -563,6 +609,67 @@ class Bfm_Leads_Public {
 		}
 
 		return 'unknown';
+
+	}
+
+	public function get_setting( $section, $option, $default = '' ) {
+
+	    $options = get_option( $section );
+
+
+	    if ( isset( $options[$option] ) ) {
+
+	        return $options[$option];
+
+	    }
+
+	    return $default;
+	}
+
+	private function send_data_to_mailing_provider($data){
+
+		$provider = $this->get_setting('bfm_global_settings', 'bfm_mailing_provider', false);
+
+		$api_key = $this->get_setting('bfm_get_response', 'bfm_api_key', false);
+
+		$campaign_id = $this->get_setting('bfm_get_response', 'bfm_campaigns_list', false);
+
+		if( !$api_key || $provider == 'none' ){return;}
+
+		switch ($provider) {
+
+			case 'get_response':
+
+				$get_response = new Get_Response_Proxy( $api_key );
+
+				if( isset( $data['name'] ) ){
+
+					$contact = array(
+
+						'campaign' => $campaign_id,
+
+						'name' => $data['name'],
+
+						'email' => $data['email']
+
+					);
+
+				}else{
+
+					$contact = array(
+
+						'campaign' => $campaign_id,
+
+						'email' => $data['email']
+
+					);
+
+				}
+
+				$result = $get_response->add_contact($contact);
+
+				break;
+		}
 
 	}
 

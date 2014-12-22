@@ -9,6 +9,12 @@
 .bfm-postbox {
   padding: 20px;
 }
+.bfm-postbox .row {
+  border-bottom: 1px solid #f0f0f0;
+}
+.bfm-postbox .row:last-child {
+  border-bottom: 0px;
+}
 .bfm-postbox .row p {
   padding: 0 20px;
 }

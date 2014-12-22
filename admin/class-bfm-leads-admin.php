@@ -42,6 +42,8 @@ class Bfm_Leads_Admin {
 
 	private $db;
 
+	private $settings_api;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -54,6 +56,7 @@ class Bfm_Leads_Admin {
 		$this->bfm_leads = $bfm_leads;
 		$this->version = $version;
 		$this->db = new Bfm_Leads_Db();
+		$this->settings_api = new WeDevs_Settings_API();
 
 	}
 
@@ -95,11 +98,12 @@ class Bfm_Leads_Admin {
 	}
 
 	public function add_menus(){
-		//add_submenu_page( 'edit.php?post_type=impactful-pact', 'Integrations', __('Settings', $this->impactful), 'manage_options', 'impactful-providers', array($this, 'provider_options') );
-		//
+
 		add_menu_page( 'Leads', 'Leads', 'manage_options', 'bfm-leads', array( $this, 'page_main_leads'), '', '66' );
 
 		add_submenu_page( 'bfm-leads', 'Analytics', 'Analytics', 'manage_options', 'bfm-analytics', array($this, 'page_analytics') );
+
+		add_submenu_page( 'bfm-leads', 'Settings', 'Settings', 'manage_options', 'bfm-settings', array($this, 'page_settings') );
 	}
 
 	public function page_main_leads(){
@@ -148,6 +152,12 @@ class Bfm_Leads_Admin {
 		$stats_path = plugin_dir_path( __FILE__ ) . 'partials/bfm-leads-stats.php';
 
 		include plugin_dir_path( __FILE__ ) . 'partials/bfm-leads-analytics.php';
+
+	}
+
+	public function page_settings(){
+
+		include plugin_dir_path( __FILE__ ) . 'partials/bfm-leads-settings.php';
 
 	}
 
@@ -457,6 +467,194 @@ class Bfm_Leads_Admin {
 
 		return $lead;
 
+	}
+
+	public function create_settings(){
+
+		 $sections = array(
+            array(
+                'id' => 'bfm_global_settings',
+                'title' => __( 'Global Settings', 'bfm' )
+            ),
+            array(
+                'id' => 'bfm_form_colors',
+                'title' => __( 'Form Colors', 'bfm' )
+            ),
+            array(
+                'id' => 'bfm_get_response',
+                'title' => __( 'Get Response', 'bfm' )
+            )
+        );
+
+		$fields = array(
+			'bfm_global_settings' => array(
+				 array(
+					'name'  => 'bfm_footer_posts',
+					'label' => __( 'Show in Post Footer?', 'bfm' ),
+					'desc'  => __( 'Check this option to show the form in all the footer posts', 'bfm' ),
+					'type'  => 'checkbox'
+                ),
+				array(
+					'name'    => 'bfm_footer_form',
+					'label'   => __( 'Footer Form', 'bfm' ),
+					'desc'    => __( 'Which form you want to show in the post footer.', 'bfm' ),
+					'type'    => 'select',
+					'default' => '1',
+					'options' => array(
+						'1' => '4 Steps Form',
+						'2' => '3 Steps Form'
+					)
+				),
+				array(
+					'name'    => 'bfm_footer_form_layout',
+					'label'   => __( 'Footer Form Layout', 'bfm' ),
+					'desc'    => __( 'Which form layout you want to use in the post footer.', 'bfm' ),
+					'type'    => 'select',
+					'default' => 'horizontal',
+					'options' => array(
+						'vertical' => 'Vertical',
+						'horizontal' => 'Horizontal'
+					)
+				),
+				array(
+					'name'    => 'bfm_thankyou_page',
+					'label'   => __( 'Thank You Page', 'bfm' ),
+					'desc'    => __( 'Where the user will be redirected after form completion? ', 'bfm' ),
+					'type'    => 'text',
+					'default' => get_option('siteurl')
+
+				),
+				array(
+					'name'    => 'bfm_mailing_provider',
+					'label'   => __( 'E-Mailing Provider', 'bfm' ),
+					'desc'    => __( 'Which e-mailing provider do you use?', 'bfm' ),
+					'type'    => 'select',
+					//TODO GET PROVIDERS LIST....
+					'options' => array(
+						'none'         => __('None', 'bfm'),
+						'get_response' => __('Get Response', 'bfm')
+					)
+				)
+			),
+			'bfm_form_colors' => array(
+				array(
+                    'name' => 'bfm_f_border_color',
+                    'label' => __( 'Form Border Color', 'bfm' ),
+                    'desc' => __( 'Color to use in the forms border.', 'bfm' ),
+                    'type' => 'color',
+                    'default' => '#f3f6f7'
+                ),
+                array(
+                    'name' => 'bfm_f_left_inner_bg',
+                    'label' => __( 'Fields Panel Background', 'bfm' ),
+                    'desc' => __('This panel is where the form fields are shown.', 'bfm'),
+                    'type' => 'color',
+                    'default' => '#fff'
+                ),
+                array(
+                    'name' => 'bfm_f_right_inner_bg',
+                    'label' => __( 'Botton Panel Background', 'bfm' ),
+                    'desc' => __('This panel is where the form bottom is shown.', 'bfm'),
+                    'type' => 'color',
+                    'default' => '#e7ebed'
+                ),
+                array(
+                    'name' => 'bfm_f_button_bg',
+                    'label' => __( 'Botton Background', 'bfm' ),
+                    'type' => 'color',
+                    'default' => '#2ab6d6'
+                ),
+                array(
+                    'name' => 'bfm_f_button_color',
+                    'label' => __( 'Botton Text', 'bfm' ),
+                    'type' => 'color',
+                    'default' => '#fff'
+                ),
+                array(
+                    'name' => 'bfm_f_labels_color',
+                    'label' => __( 'Labels Text', 'bfm' ),
+                    'type' => 'color',
+                    'default' => '#333'
+                ),
+
+			)
+		);
+
+		//Dynamic Fields...
+
+		$fields['bfm_get_response'] = array();
+
+		$api_key = array(
+			'name'    => 'bfm_api_key',
+			'label'   => __( 'Get Response API KEY', 'bfm' ),
+			'desc'    => __( 'Please get your API Key in <a href="https://app.getresponse.com/account.html#api" target="_blank">THIS LINK</a>.', 'bfm' ),
+			'type'    => 'text'
+		);
+
+		array_push( $fields['bfm_get_response'], $api_key);
+
+		$api_key = $this->get_setting('bfm_get_response', 'bfm_api_key', false);
+
+		if( $api_key ){
+
+			$get_response = new Get_Response_Proxy( $api_key );
+
+			$campaigns = $get_response->get_campaigns();
+
+			if( $campaigns ){
+
+				//var_dump($campaigns);
+
+				$campaigns_list = array(
+					'name'    => 'bfm_campaigns_list',
+					'label'   => __( 'Campaign', 'bfm' ),
+					'desc'    => __( 'Please select which campaign to use to add your leads.', 'bfm' ),
+					'type'    => 'select',
+					'options' => $this->parse_get_response_campaigns($campaigns)
+				);
+
+			}
+
+		}
+
+		array_push( $fields['bfm_get_response'], $campaigns_list);
+
+
+
+        $this->settings_api->set_sections( $sections );
+
+        $this->settings_api->set_fields( $fields );
+
+        $this->settings_api->admin_init();
+
+	}
+
+	private function parse_get_response_campaigns($campaigns){
+
+		$out = array();
+
+		foreach ($campaigns as $key => $campaign) {
+
+			$out[$key] = $campaign['name'];
+
+		}
+
+		return $out;
+
+	}
+
+	public function get_setting( $section, $option, $default = '' ) {
+
+	    $options = get_option( $section );
+
+
+	    if ( isset( $options[$option] ) ) {
+
+	        return $options[$option];
+
+	    }
+
+	    return $default;
 	}
 
 }

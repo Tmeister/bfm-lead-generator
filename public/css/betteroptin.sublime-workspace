@@ -519,6 +519,72 @@
 	},
 	"buffers":
 	[
+		{
+			"contents": "Searching 829 files for \"wpbo_insert_data\"\n\n/Users/tmeister/Sources/others/betteroptin/trunk/includes/dummy-content.php:\n   62  					++$limit;\n   63  \n   64: 				wpbo_insert_data( array( 'time' => $time, 'data_type' => $dtype, 'popup_id' => $popup->ID, ), false );\n   65  \n   66  			}\n\n/Users/tmeister/Sources/others/betteroptin/trunk/public/includes/class-analytics.php:\n  488   * @return mixed             ID of the data on success or $wp_error on failure\n  489   */\n  490: function wpbo_insert_data( $data = array(), $wp_error = true ) {\n  491  \n  492  	global $wpbo_analytics;\n\n2 matches across 2 files\n\n\nSearching 829 files for \"wpbo_analytics\"\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/part-analytics.js:\n   30  	var data = {\n   31  		'action': 'wpbo_get_graph_data',\n   32: 		'wpbo_analytics_popup': wpboTable.data('popup'),\n   33: 		'wpbo_analytics_time': wpboTable.data('timeframe'),\n   34: 		'wpbo_analytics_period': wpboTable.data('period')\n   35  	};\n   36  	$.post(ajaxurl, data, function (response) {\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/class-better-optin-admin.php:\n  977  \n  978  		$query     = array( 'data_type' => 'any', 'limit' => -1 );\n  979: 		$timeframe = unserialize( stripslashes( $_POST['wpbo_analytics_time'] ) );\n  980: 		$popup     = isset( $_POST['wpbo_analytics_popup'] ) ? $_POST['wpbo_analytics_popup'] : 'all';\n  981: 		$period    = isset( $_POST['wpbo_analytics_period'] ) ? $_POST['wpbo_analytics_period'] : 'today';\n  982  \n  983  		/* Set the period */\n  ...\n 1272  		}\n 1273  \n 1274: 		$actions['wpbo_analytics'] = sprintf( '<a href=\"%s\" class=\"google_link\">%s</a>', add_query_arg( array( 'post_type' => 'wpbo-popup', 'page' => 'wpbo-analytics', 'popup' => $post->ID, 'period' => 'today' ), admin_url( 'edit.php' ) ), __( 'Stats', 'wpbo' ) );\n 1275  \n 1276  		return $actions;\n\n/Users/tmeister/Sources/others/betteroptin/trunk/public/class-better-optin.php:\n  205  \n  206  		/* Create database table */\n  207: 		WPBO_Analytics::create_table();\n  208  \n  209  		/* Write database version */\n  210: 		update_option( 'wpbo_db_version', WPBO_Analytics::$db_version );\n  211  \n  212  		/**\n  ...\n  743  	public function new_impression() {\n  744  \n  745: 		global $wpbo_analytics;\n  746  \n  747  		$post_id = intval( $_POST['popup_id'] );\n  ...\n  751  \n  752  		/* Log the impression */\n  753: 		$log = $wpbo_analytics->insert_data( array( 'popup_id' => $post_id, 'data_type' => 'impression', 'ip_address' => self::get_ip_address(), 'referer' => esc_url( $_SERVER['HTTP_REFERER'] ), 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ), true );\n  754  \n  755  		update_post_meta( $post_id, 'wpbo_impressions', $new, $prev );\n\n/Users/tmeister/Sources/others/betteroptin/trunk/public/includes/class-analytics.php:\n   13   * @copyright 2014 ThemeAvenue\n   14   */\n   15: class WPBO_Analytics {\n   16  \n   17  	/**\n   ..\n   21  	 * @var    string\n   22  	 */\n   23: 	public static $db_suffix = 'wpbo_analytics';\n   24  \n   25  	/**\n   ..\n  449   * @var    object\n  450   */\n  451: $wpbo_analytics = new WPBO_Analytics;\n  452  \n  453  /*----------------------------------------------------------------------------*\n  ...\n  462   *\n  463   * @since  1.0.0\n  464:  * @see    WPBO_Analytics::get_datas()\n  465   * @param  array  $args   Parameters used in the SQL query\n  466   * @param  string $output Format to use when returning the results\n  ...\n  469  function wpbo_get_datas( $args = array(), $output = 'ARRAY_A' ) {\n  470  \n  471: 	global $wpbo_analytics;\n  472  \n  473: 	$datas = $wpbo_analytics->get_datas( $args, $output );\n  474  \n  475  	return $datas;\n  ...\n  480   * Insert data in the database.\n  481   *\n  482:  * Insert a new row of data in the _wpbo_analytics table.\n  483   *\n  484   * @since  1.0.0\n  485:  * @see    WPBO_Analytics::insert_data()\n  486   * @param  array   $data     Data to add\n  487   * @param  boolean $wp_error Allow method to return a WP_Error object\n  ...\n  490  function wpbo_insert_data( $data = array(), $wp_error = true ) {\n  491  \n  492: 	global $wpbo_analytics;\n  493  \n  494: 	$insert = $wpbo_analytics->insert_data( $data, $wp_error = true );\n  495  \n  496  	return $insert;\n\n/Users/tmeister/Sources/others/betteroptin/trunk/public/includes/class-submission.php:\n   81  	public function init() {\n   82  \n   83: 		global $wpbo_analytics;\n   84  \n   85  		$popup_id    = intval( $_POST['wpbo_id'] );\n   ..\n   91  \n   92  			/* Log the convertion */\n   93: 			$log = $wpbo_analytics->insert_data( array( 'popup_id' => $popup_id, 'data_type' => 'conversion', 'ip_address' => Better_Optin::get_ip_address(), 'referer' => esc_url( $_SERVER['HTTP_REFERER'] ), 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ), false );\n   94  \n   95  			/* Set the cookie */\n\n/Users/tmeister/Sources/others/betteroptin/trunk/uninstall.php:\n   19   */\n   20  global $wpdb;\n   21: $table = $wpdb->prefix . 'wpbo_analytics';\n   22  $wpdb->query( \"DROP TABLE IF EXISTS $table\" );\n   23  \n\n27 matches across 6 files\n\n\nSearching 829 files for \"wpbo_get_graph_data\"\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/part-analytics.js:\n   29  	////////////////\n   30  	var data = {\n   31: 		'action': 'wpbo_get_graph_data',\n   32  		'wpbo_analytics_popup': wpboTable.data('popup'),\n   33  		'wpbo_analytics_time': wpboTable.data('timeframe'),\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/class-better-optin-admin.php:\n   63  		/* Check posts associations */\n   64  		add_action( 'wp_ajax_wpbo_check_page_availability',  array( $this, 'check_page_availability' ) );\n   65: 		add_action( 'wp_ajax_wpbo_get_graph_data',  array( $this, 'get_graph_data' ) );\n   66  		add_action( 'wp_ajax_wpbo_tour_completed', array( $this, 'tour_completed' ) );\n   67  		add_action( 'wp_ajax_wpbo_get_doc', array( $this, 'get_documentation' ) );\n\n2 matches across 2 files\n\n\nSearching 829 files for \"wpboTable\"\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/part-analytics.js:\n    5  \n    6  	// Define variables\n    7: 	var wpboTable = $('#wpbo-stats-general'),\n    8  		plotarea = $('#wpbo-stats-graph');\n    9  \n   ..\n   30  	var data = {\n   31  		'action': 'wpbo_get_graph_data',\n   32: 		'wpbo_analytics_popup': wpboTable.data('popup'),\n   33: 		'wpbo_analytics_time': wpboTable.data('timeframe'),\n   34: 		'wpbo_analytics_period': wpboTable.data('period')\n   35  	};\n   36  	$.post(ajaxurl, data, function (response) {\n   ..\n   80  	// DataTables //\n   81  	/////////////////\n   82: 	wpboTable.dataTable({\n   83  		\"paging\": false,\n   84  		\"info\": false,\n\n5 matches in 1 file\n\n\nSearching 829 files for \"array_merge_combine\"\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/class-better-optin-admin.php:\n 1145  \n 1146  		/* Get the count on the scaled timestamp */\n 1147: 		$imp_array = $this->array_merge_combine( $impressions, $scale );\n 1148: 		$con_array = $this->array_merge_combine( $conversions, $scale );\n 1149  \n 1150  		/**\n ....\n 1210  	 * @return array          An array sorted by time and hits in a format compatible with Float for the graph\n 1211  	 */\n 1212: 	public static function array_merge_combine( $array, $format ) {\n 1213  \n 1214  		$parsed = array();\n\n3 matches in 1 file\n\n\nSearching 829 files for \"total_impressions\"\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/views/analytics-stats.php:\n  179  \n  180  						/* Increment the global vars */\n  181: 						$total_impressions = $total_impressions + count( $impressions );\n  182  						$total_conversions = $total_conversions + count( $conversions );\n  183  						?>\n\n/Users/tmeister/Sources/others/betteroptin/trunk/admin/views/analytics.php:\n    3   * Global vars\n    4   */\n    5: $total_impressions = 0;\n    6  $total_conversions = 0;\n    7  \n    .\n  115  						<h3><span><?php printf( __( '%s\\'s Stats Breakdown', 'wpbo' ), ucwords( str_replace( '_', ' ', $period ) ) ); ?></span></h3>\n  116  						<?php\n  117: 						$total_rate = ( 0 === $total_conversions || 0 === $total_impressions ) ? 0 : ( 100 * $total_conversions ) / $total_impressions;\n  118  						$total_rate = number_format( $total_rate, 2 );\n  119  						?>\n  120  						<div class=\"inside\">\n  121  							<ul>\n  122: 								<li><?php printf( __( 'Total impressions for %s: %s', 'wpbo' ), str_replace( '_', ' ' , $period ), '<code>' . number_format( $total_impressions, 0 ) . '</code>' ); ?></li>\n  123  								<li><?php printf( __( 'Total conversions for %s: %s', 'wpbo' ), str_replace( '_', ' ' , $period ), '<code>' . number_format( $total_conversions, 0 ) . '</code>' ); ?></li>\n  124  								<li><?php printf( __( 'Percentage of conversions for %s: %s', 'wpbo' ), str_replace( '_', ' ' , $period ), \"<code>$total_rate%</code>\" ); ?></li>\n\n6 matches across 2 files\n",
+			"settings":
+			{
+				"buffer_size": 8739,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/part-analytics.js",
+			"settings":
+			{
+				"buffer_size": 1859,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/public/class-better-optin.php",
+			"settings":
+			{
+				"buffer_size": 21688,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/public/includes/class-analytics.php",
+			"settings":
+			{
+				"buffer_size": 13187,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/includes/dummy-content.php",
+			"settings":
+			{
+				"buffer_size": 1622,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/views/analytics.php",
+			"settings":
+			{
+				"buffer_size": 6844,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/admin.js",
+			"settings":
+			{
+				"buffer_size": 3704,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/class-better-optin-admin.php",
+			"settings":
+			{
+				"buffer_size": 46933,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -697,7 +763,15 @@
 	},
 	"expanded_folders":
 	[
-		"/Users/tmeister/Sources/others/betteroptin/trunk"
+		"/Users/tmeister/Sources/others/betteroptin/trunk",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/admin",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/admin/views",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/includes",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/includes/addons",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/public",
+		"/Users/tmeister/Sources/others/betteroptin/trunk/public/includes"
 	],
 	"file_history":
 	[
@@ -839,6 +913,7 @@
 		"height": 113.0,
 		"where_history":
 		[
+			"/Users/tmeister/Sources/others/betteroptin/trunk",
 			"/Applications/MAMP/htdocs/wp",
 			"/Applications/MAMP/htdocs/wp6",
 			"/Applications/MAMP/htdocs/wp6/wp-includes",
@@ -959,6 +1034,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"total_impressions",
+			"array_merge_combine",
+			"wpboTable",
+			"get_graph_data",
+			"wpbo_get_graph_data",
+			"get_ip_address",
+			"wpbo_analytics",
+			"wpbo_insert_data",
 			"saveAditionalFields",
 			"		$",
 			"price",
@@ -1078,15 +1161,7 @@
 			"blockquote",
 			"blockquore",
 			"entry-content",
-			"single",
-			"@color",
-			"single",
-			"content-width",
-			"entry-content",
-			"@color",
-			"border",
-			"width",
-			");\n"
+			"single"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1232,8 +1307,1216 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8739,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										162,
+										178
+									],
+									[
+										485,
+										501
+									],
+									[
+										808,
+										822
+									],
+									[
+										866,
+										880
+									],
+									[
+										927,
+										941
+									],
+									[
+										1258,
+										1272
+									],
+									[
+										1322,
+										1336
+									],
+									[
+										1357,
+										1371
+									],
+									[
+										1426,
+										1440
+									],
+									[
+										1462,
+										1476
+									],
+									[
+										1579,
+										1593
+									],
+									[
+										1995,
+										2009
+									],
+									[
+										2116,
+										2130
+									],
+									[
+										2242,
+										2256
+									],
+									[
+										2381,
+										2395
+									],
+									[
+										2844,
+										2858
+									],
+									[
+										2961,
+										2975
+									],
+									[
+										3048,
+										3062
+									],
+									[
+										3069,
+										3083
+									],
+									[
+										3238,
+										3252
+									],
+									[
+										3509,
+										3523
+									],
+									[
+										3551,
+										3565
+									],
+									[
+										3725,
+										3739
+									],
+									[
+										3799,
+										3813
+									],
+									[
+										4056,
+										4070
+									],
+									[
+										4099,
+										4113
+									],
+									[
+										4333,
+										4347
+									],
+									[
+										4477,
+										4491
+									],
+									[
+										4890,
+										4904
+									],
+									[
+										5195,
+										5214
+									],
+									[
+										5599,
+										5618
+									],
+									[
+										6027,
+										6036
+									],
+									[
+										6219,
+										6228
+									],
+									[
+										6276,
+										6285
+									],
+									[
+										6339,
+										6348
+									],
+									[
+										6492,
+										6501
+									],
+									[
+										6809,
+										6828
+									],
+									[
+										6883,
+										6902
+									],
+									[
+										7113,
+										7132
+									],
+									[
+										7407,
+										7424
+									],
+									[
+										7428,
+										7445
+									],
+									[
+										7683,
+										7700
+									],
+									[
+										7972,
+										7989
+									],
+									[
+										8030,
+										8047
+									],
+									[
+										8319,
+										8336
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								7663,
+								7663
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content"
+							],
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 6,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"sublime_auto_complete": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 4120.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/part-analytics.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1859,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								585,
+								585
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content"
+							],
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 970.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/public/class-better-optin.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 21688,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19522,
+								19522
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content"
+							],
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"is_xml": false,
+							"sublime_auto_complete": true,
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 14639.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/public/includes/class-analytics.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13187,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6018,
+								6018
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content"
+							],
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"is_xml": false,
+							"sublime_auto_complete": true,
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 4779.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/includes/dummy-content.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1622,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								699,
+								699
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"is_xml": false,
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/views/analytics.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6844,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4675,
+								5935
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content"
+							],
+							"is_xml": false,
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 2259.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/assets/js/admin.js",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 3704,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content"
+							],
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/Users/tmeister/Sources/others/betteroptin/trunk/admin/class-better-optin-admin.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 46933,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								36586,
+								36907
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content"
+							],
+							"is_xml": false,
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 25120.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
 			]
 		}
 	],

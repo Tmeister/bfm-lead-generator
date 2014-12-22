@@ -202,3 +202,19 @@
 .select2-results li {
   font-size: 14px !important;
 }
+@media only screen and (min-width: 320px) and (max-width: 480px) {
+  .step-optin-form form .bfm-left-inner {
+    width: 100%;
+  }
+  .step-optin-form form .bfm-left-inner .mask fieldset input,
+  .step-optin-form form .bfm-left-inner .mask fieldset textarea {
+    width: 100%;
+  }
+  .step-optin-form form .bfm-left-inner .mask fieldset select {
+    width: 100%;
+  }
+  .step-optin-form form .bfm-right-inner {
+    width: 100%;
+    padding: 25px 0;
+  }
+}
