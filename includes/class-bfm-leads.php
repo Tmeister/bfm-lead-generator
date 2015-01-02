@@ -69,7 +69,7 @@ class Bfm_Leads {
 	public function __construct() {
 
 		$this->bfm_leads = 'bfm-leads';
-		$this->version = '1.0.3';
+		$this->version = '1.0.4';
 
 		$this->load_dependencies();
 		$this->set_locale();
