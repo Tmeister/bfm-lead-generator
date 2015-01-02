@@ -343,7 +343,7 @@ class Bfm_Leads_Db{
 
 		$forms = $wpdb->get_results( $sql );
 
-		$forms_array = [];
+		$forms_array = array();
 
 		foreach ($forms as $form) {
 
